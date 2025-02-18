@@ -9,7 +9,7 @@ function CardPermitComponent() {
         </Typography>
 
         {/* Form in Column Direction */}
-
+          
         <Box
           sx={{
             display: "flex",
