@@ -1,4 +1,5 @@
 import CarPermitManagementComponent from "../components/CarPermitManagement/CarPermitManagementComponent";
+import Layout from "../components/layout/Layout";
 
 // Events data
 const events = [
@@ -28,7 +29,9 @@ const events = [
 export default function CarPermitManagementPage() {
   return (
     <>
-      <CarPermitManagementComponent events={events} />
+      <Layout>
+        <CarPermitManagementComponent events={events} />
+      </Layout>
     </>
   );
 }
