@@ -1,15 +1,39 @@
 import { Box, TextField, Button, Typography } from "@mui/material";
 import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-function EventsComponent() {
+function EventsComponent({ eventEditData, onSuccess }) {
   const [eventData, setEventData] = useState({
+    _id: null, // For edit mode
     eventName: "",
     eventCode: "",
     startDate: "",
     endDate: "",
     notes: "",
   });
+
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (eventEditData) {
+      setEventData({
+        _id: eventEditData._id || null,
+        eventName: eventEditData.name || "",
+        eventCode: eventEditData.code || "",
+        startDate: eventEditData.dates?.[0]
+          ? new Date(eventEditData.dates[0]).toISOString().split("T")[0]
+          : "",
+        endDate: eventEditData.dates?.[1]
+          ? new Date(eventEditData.dates[1]).toISOString().split("T")[0]
+          : "",
+        notes: eventEditData.notes || "",
+      });
+    }
+    console.log("onSuccess Function:", onSuccess);
+  }, [eventEditData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,7 +42,7 @@ function EventsComponent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Check Required Fields
+
     if (
       !eventData.eventName ||
       !eventData.eventCode ||
@@ -28,32 +52,65 @@ function EventsComponent() {
       alert("Fill All The Required Fields");
       return;
     }
-    try {
-      const response = await axios.post("/api/event/CreateEvent", {
-        name: eventData.eventName,
-        code: eventData.eventCode,
-        year: new Date(eventData.startDate).getFullYear(),
-        dates: [eventData.startDate, eventData.endDate],
-        notes: eventData.notes,
-      });
 
-      if (response.status === 201) {
-        alert("Event Created Successfully");
+    try {
+      setLoading(true);
+      let response;
+      if (eventData._id) {
+        response = await axios.put(
+          `/api/event/CreateEvent?id=${eventData._id}`,
+          {
+            name: eventData.eventName,
+            code: eventData.eventCode,
+            year: new Date(eventData.startDate).getFullYear(),
+            dates: [eventData.startDate, eventData.endDate],
+            notes: eventData.notes,
+          }
+        );
+        console.log("Toast Function Call Ho Raha Hai");
+        toast.success("Event Updated Successfully");
+      } else {
+        response = await axios.post("/api/event/CreateEvent", {
+          name: eventData.eventName,
+          code: eventData.eventCode,
+          year: new Date(eventData.startDate).getFullYear(),
+          dates: [eventData.startDate, eventData.endDate],
+          notes: eventData.notes,
+        });
+        console.log("Toast Function Call Ho Raha Hai");
+        toast.success("Event Added Successfully");
+      }
+
+      if (response.status === 200 || response.status === 201) {
         setEventData({
+          _id: null,
           eventName: "",
           eventCode: "",
           startDate: "",
           endDate: "",
           notes: "",
         });
+
+        onSuccess(); // ✅ Update hone ke baad refresh karein
       }
     } catch (error) {
-      console.error(
-        "Error Creating Event",
-        error.response?.data || error.message
-      );
-      alert(error.response?.data?.message || "Failed to create event!");
+      console.log(error);
+      toast.error(error.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // 🖊 **Function to Set Data for Editing**
+  const handleEdit = (event) => {
+    setEventData({
+      _id: event._id,
+      eventName: event.name,
+      eventCode: event.code,
+      startDate: new Date(event.dates[0]).toISOString().split("T")[0], // Converting Date to YYYY-MM-DD format
+      endDate: new Date(event.dates[1]).toISOString().split("T")[0],
+      notes: event.notes || "",
+    });
   };
 
   return (
@@ -142,10 +199,12 @@ function EventsComponent() {
             variant="contained"
             color="primary"
             sx={{ mt: 2 }}
+            disabled={loading}
           >
-            Submit
+            {loading ? "Submitting..." : "Submit"}
           </Button>
         </Box>
+        <ToastContainer position="top-center" autoClose={3000} />
       </Box>
     </>
   );

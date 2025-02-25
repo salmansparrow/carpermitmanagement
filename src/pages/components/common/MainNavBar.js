@@ -24,14 +24,14 @@ const menuItems = [
     title: "Events",
     options: [
       { name: "Add Event", path: "/events" },
-      { name: "View Events", path: "/events/view" },
+      { name: "View Events", path: "/events/viewevents" },
     ],
   },
   {
     title: "Card Permit Types",
     options: [
       { name: "Add Card", path: "/cardpermit" },
-      { name: "View Card", path: "/card-permit/view" },
+      { name: "View Card", path: "/cardpermit/viewcards" },
     ],
   },
   {

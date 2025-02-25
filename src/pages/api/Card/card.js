@@ -38,10 +38,29 @@ const getCardById = async (req, res, id) => {
 //  GET All Cards
 const getAllCards = async (req, res) => {
   try {
-    const cards = await Card.find();
+    let { page = 1, limit = 10 } = req.query; // Default values: page 1, limit 10
+    page = parseInt(page); // Convert to integer
+    limit = parseInt(limit); // Convert to integer
+
+    const totalCards = await Card.countDocuments(); // Total number of cards
+    const totalPages = Math.ceil(totalCards / limit); // Total pages
+
+    // Ensure page is within valid range
+    if (page < 1) page = 1;
+    if (page > totalPages) page = totalPages;
+
+    const cards = await Card.find()
+      .skip((page - 1) * limit) // Skip previous pages
+      .limit(limit); // Limit per page
+
     if (cards.length === 0)
       return res.status(404).json({ message: "No cards found" });
-    return res.status(200).json(cards);
+    return res.status(200).json({
+      totalCards,
+      totalPages,
+      currentPage: page,
+      cards,
+    });
   } catch (error) {
     return res.status(500).json({ error: "Error fetching cards" });
   }
@@ -66,6 +85,7 @@ const createCard = async (req, res) => {
     const newCard = await card.save();
     return res.status(201).json(newCard);
   } catch (error) {
+    console.error("Create Card Error:", error); // Log error in console
     return res.status(500).json({ message: "Server error" });
   }
 };
