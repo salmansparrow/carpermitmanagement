@@ -46,11 +46,11 @@ const getAllEvents = async (req, res) => {
   }
 };
 
-// ✅ CREATE Event
+//  CREATE Event
 const createEvent = async (req, res) => {
   try {
-    const { name, code, year, dates, notes } = req.body;
-    if (!name || !code || !year || !dates) {
+    const { name, code, year, startDate, endDate , notes } = req.body;
+    if (!name || !code || !year || !startDate || !endDate) {
       return res.status(400).json({ message: 'Fill all required fields' });
     }
 
@@ -59,7 +59,7 @@ const createEvent = async (req, res) => {
       return res.status(400).json({ message: 'Event already exists with this name or code.' });
     }
 
-    const event = new Event({ name, code, year, dates, notes });
+    const event = new Event({ name, code, year, startDate: new Date(startDate),  endDate: new Date(endDate),  notes });
     const newEvent = await event.save();
     return res.status(201).json(newEvent);
   } catch (error) {
@@ -67,7 +67,7 @@ const createEvent = async (req, res) => {
   }
 };
 
-// ✅ UPDATE Event
+//  UPDATE Event
 const updateEvent = async (req, res, id) => {
   try {
     const updatedEvent = await Event.findByIdAndUpdate(id, req.body, { new: true });
@@ -78,7 +78,7 @@ const updateEvent = async (req, res, id) => {
   }
 };
 
-// ✅ DELETE Event
+//  DELETE Event
 const deleteEvent = async (req, res, id) => {
   try {
     const deletedEvent = await Event.findByIdAndDelete(id);

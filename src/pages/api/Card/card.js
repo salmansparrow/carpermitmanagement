@@ -15,7 +15,7 @@ export default async function handler(req, res) {
         return updateCard(req, res, id);
       case 'DELETE':
         return deleteCard(req, res, id);
-      default:
+      default:   
         return res.status(405).json({ error: 'Method not allowed' });
     }
   } catch (error) {

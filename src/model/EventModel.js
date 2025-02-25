@@ -13,7 +13,15 @@ const EventSchema = new mongoose.Schema({
 
 },
   year: Number,
-  dates: [Date],
+
+  startDate :{
+    type : Date,
+    required : true
+  },
+  endDate :{
+    type : Date,
+    required : true
+  },
   notes: String,
 });
 export default mongoose.models.Event || mongoose.model('Event', EventSchema);
