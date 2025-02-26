@@ -1,5 +1,5 @@
 import dbConnect from '../../../../lib/dbConnect';
-import Permit from '../../../model/PermitModel';
+import Permit from '../model/PermitModel';
 
 export default async function handler(req, res) {
   await dbConnect();
