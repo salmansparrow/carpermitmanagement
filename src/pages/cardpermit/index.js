@@ -1,10 +1,10 @@
-import CardPermitComponent from "../components/CardPermit/CardPermitComponent";
+import CardPermitForm from "../components/CardPermit/CardPermitComponent";
 import Layout from "../components/layout/Layout";
 
 function CardPermit() {
   return (
     <Layout>
-      <CardPermitComponent />
+      <CardPermitForm />
     </Layout>
   );
 }
