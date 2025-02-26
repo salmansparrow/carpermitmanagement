@@ -37,8 +37,8 @@ const menuItems = [
   {
     title: "Car Permit",
     options: [
-      { name: "Add Permit", path: "/carpermitmanagement" },
-      { name: "View Permit", path: "/car-permit/view" },
+      { name: "Add Permit", path: "/carpermit" },
+      { name: "View Permit", path: "/carpermit/carpermitlist" },
     ],
   },
   {

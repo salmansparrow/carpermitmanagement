@@ -26,7 +26,6 @@ function ViewAllEventsComponent() {
   const [loading, setLoading] = useState(false);
   const [viewEvent, setViewEvent] = useState(null);
   const [editEvent, setEditEvent] = useState(null);
-  const router = useRouter();
 
   const fetchEvents = async () => {
     try {
