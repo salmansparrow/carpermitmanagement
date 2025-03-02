@@ -17,7 +17,9 @@ function CarPermitComponent() {
   const [selectedEvent, setSelectedEvent] = useState("");
   const [selectedCard, setSelectedCard] = useState("");
   const [notes, setNotes] = useState("");
-  const [imageURL, setImageURL] = useState(null);
+  const [imageURL, setImageURL] = useState(null); // For displaying image
+  const [editedImage, setEditedImage] = useState(null); // For storing edited image
+  const [rawImage, setRawImage] = useState(null); // For storing raw image
   const imgRef = useRef(null);
 
   useEffect(() => {
@@ -32,8 +34,6 @@ function CarPermitComponent() {
     } catch (error) {
       console.error("Error fetching events:", error);
     }
-    console.log(response);
-
   };
 
   const fetchCards = async () => {
@@ -52,7 +52,8 @@ function CarPermitComponent() {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      setImageURL(event.target.result);
+      setImageURL(event.target.result); // For displaying image
+      setRawImage(event.target.result); // For storing raw image
     };
     reader.readAsDataURL(file);
   };
@@ -62,7 +63,8 @@ function CarPermitComponent() {
 
     const markerArea = new markerjs2.MarkerArea(imgRef.current);
     markerArea.addEventListener("render", (event) => {
-      imgRef.current.src = event.dataUrl;
+      imgRef.current.src = event.dataUrl; // Update image preview
+      setEditedImage(event.dataUrl); // Store edited image in state
     });
     markerArea.show();
   };
@@ -70,15 +72,22 @@ function CarPermitComponent() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!selectedEvent || !selectedCard || !imageURL) {
+    if (!selectedEvent || !selectedCard || !rawImage) {
       alert("Please fill all required fields");
+      return;
+    }
+
+    // Edited image ka validation
+    if (!editedImage) {
+      alert("Please edit the image before submitting.");
       return;
     }
 
     const formData = {
       event: selectedEvent,
       card: selectedCard,
-      editedImage: imgRef.current.src, // Edited image with highlights
+      originalImage: rawImage, // Always save raw image
+      editedImage: editedImage, // Ensure edited image is required
       notes: notes,
     };
 
@@ -92,12 +101,15 @@ function CarPermitComponent() {
       setSelectedCard("");
       setNotes("");
       setImageURL(null);
+      setRawImage(null);
+      setEditedImage(null);
       document.getElementById("fileInput").value = "";
     } catch (error) {
       console.error("Error submitting Car Permit:", error);
       alert("Failed to create Car Permit!");
     }
   };
+
 
   return (
     <Box p={3} sx={{ mt: 10 }}>
