@@ -1,5 +1,5 @@
-import axios from "axios";
 import { useEffect, useState, useRef } from "react";
+import axios from "axios";
 import {
   Box,
   FormControl,
@@ -9,9 +9,7 @@ import {
   Button,
   TextField,
 } from "@mui/material";
-import Cropper from "react-cropper";
-import "cropperjs/dist/cropper.css";
-import { set } from "mongoose";
+import * as markerjs2 from "markerjs2";
 
 function CarPermitComponent() {
   const [events, setEvents] = useState([]);
@@ -19,9 +17,8 @@ function CarPermitComponent() {
   const [selectedEvent, setSelectedEvent] = useState("");
   const [selectedCard, setSelectedCard] = useState("");
   const [notes, setNotes] = useState("");
-  const [rawImage, setRawImage] = useState(null);
-  const [croppedImage, setCroppedImage] = useState(null);
-  const cropperRef = useRef(null);
+  const [imageURL, setImageURL] = useState(null);
+  const imgRef = useRef(null);
 
   useEffect(() => {
     fetchEvents();
@@ -53,24 +50,25 @@ function CarPermitComponent() {
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      setRawImage(event.target.result); // Save raw image
+      setImageURL(event.target.result);
     };
     reader.readAsDataURL(file);
   };
 
-  const handleCrop = () => {
-    if (cropperRef.current && cropperRef.current.cropper) {
-      const croppedCanvas = cropperRef.current.cropper.getCroppedCanvas();
-      if (croppedCanvas) {
-        setCroppedImage(croppedCanvas.toDataURL("image/png"));
-      }
-    }
+  const openMarkerEditor = () => {
+    if (!imgRef.current) return;
+
+    const markerArea = new markerjs2.MarkerArea(imgRef.current);
+    markerArea.addEventListener("render", (event) => {
+      imgRef.current.src = event.dataUrl;
+    });
+    markerArea.show();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!selectedEvent || !selectedCard || !rawImage || !croppedImage) {
+    if (!selectedEvent || !selectedCard || !imageURL) {
       alert("Please fill all required fields");
       return;
     }
@@ -78,8 +76,7 @@ function CarPermitComponent() {
     const formData = {
       event: selectedEvent,
       card: selectedCard,
-      originalImage: rawImage,
-      editedImage: croppedImage,
+      editedImage: imgRef.current.src, // Edited image with highlights
       notes: notes,
     };
 
@@ -88,17 +85,11 @@ function CarPermitComponent() {
       console.log("Car Permit Created:", response.data);
       alert("Car Permit Created Successfully!");
 
-      // **Reset Form Fields**
+      // Reset form
       setSelectedEvent("");
       setSelectedCard("");
       setNotes("");
-      setRawImage(null);
-      setCroppedImage(null);
-      if (cropperRef.current) {
-        cropperRef.current.cropper.clear();
-      }
-
-      // **Manually Reset File Input**
+      setImageURL(null);
       document.getElementById("fileInput").value = "";
     } catch (error) {
       console.error("Error submitting Car Permit:", error);
@@ -143,30 +134,25 @@ function CarPermitComponent() {
 
         {/* Image Upload */}
         <input type="file" id="fileInput" onChange={handleImageUpload} />
-        <Box sx={{ mt: 2, width: 500, height: 300 }}>
-          {rawImage && (
-            <Cropper
-              src={rawImage}
-              style={{ height: 300, width: "100%" }}
-              initialAspectRatio={16 / 9}
-              guides={true}
-              ref={cropperRef}
+
+        {/* Image Display with Marker.js */}
+        {imageURL && (
+          <Box mt={2} display="flex" flexDirection="column" alignItems="center">
+            <img
+              ref={imgRef}
+              src={imageURL}
+              alt="Uploaded"
+              width={500}
+              height={300}
             />
-          )}
-        </Box>
-
-        {/* Crop & Highlight Buttons */}
-        <Box mt={2} display="flex" gap={2}>
-          <Button variant="contained" color="secondary" onClick={handleCrop}>
-            Crop
-          </Button>
-        </Box>
-
-        {/* Show Cropped Image */}
-        {croppedImage && (
-          <Box mt={2}>
-            <h3>Cropped Image:</h3>
-            <img src={croppedImage} alt="Cropped" style={{ width: "300px" }} />
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={openMarkerEditor}
+              sx={{ mt: 2 }}
+            >
+              Edit / Highlight Image
+            </Button>
           </Box>
         )}
 

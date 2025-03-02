@@ -44,7 +44,7 @@ const menuItems = [
   {
     title: "Permit Generation",
     options: [
-      { name: "Create Permit", path: "/permit-generation/create" },
+      { name: "Create Permit", path: "/carpermitgeneration/" },
       { name: "View Generated Permit", path: "/permit-generation/view" },
     ],
   },
