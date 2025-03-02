@@ -32,6 +32,8 @@ function CarPermitComponent() {
     } catch (error) {
       console.error("Error fetching events:", error);
     }
+    console.log(response);
+
   };
 
   const fetchCards = async () => {
